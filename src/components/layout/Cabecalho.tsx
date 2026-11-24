@@ -19,6 +19,8 @@ type Props = {
  * Cabeçalho fixo. No topo fica transparente sobre a abertura escura; ao rolar ganha fundo creme.
  * A linha de baixo é um cano que "enche de água" conforme a leitura avança.
  * O menu do celular fica FORA do <header> (o desfoque do header prenderia o position: fixed).
+ * Com o menu aberto, o header sobe para z-[70], acima do menu (z-[60]): o z do botão só vale dentro do header,
+ * então sem isso o menu cobria o X e não dava para fechar.
  */
 export function Cabecalho({ logoClaro, logoEscuro, servicos, whats, tel, telTexto }: Props) {
   const pathname = usePathname();
@@ -75,7 +77,7 @@ export function Cabecalho({ logoClaro, logoEscuro, servicos, whats, tel, telText
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,color] duration-500 ${
+        className={`fixed inset-x-0 top-0 ${aberto ? "z-[70]" : "z-50"} transition-[background-color,box-shadow,color] duration-500 ${
           solido ? "bg-creme/96 text-grafite shadow-[0_1px_0_rgb(0_0_0/0.06)] backdrop-blur-xl" : "bg-transparent text-osso"
         }`}
       >
