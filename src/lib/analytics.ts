@@ -2,6 +2,8 @@
  * Eventos de conversão. Só enviam algo se o GA4 estiver carregado
  * (NEXT_PUBLIC_GA_ID definido + visitante aceitou os cookies).
  *
+ * whatsapp_click e telefone_click também contam como conversão "Contato" no Google Ads.
+ *
  * Eventos: whatsapp_click, telefone_click, cta_contato, formulario_envio,
  * ver_servico, perfil_google_click, avaliacao_click.
  *
@@ -16,6 +18,23 @@ type Gtag = (cmd: "event", nome: string, params?: Record<string, string>) => voi
 type Janela = Window & { gtag?: Gtag; __eventosPendentes?: [string, Record<string, string>][] };
 
 const CHAVE_ORIGEM = "maxima-encanador-origem";
+
+/** Google Ads: conta e rótulo da conversão "Contato" (clique em WhatsApp ou Ligar). IDs públicos. */
+export const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID ?? "AW-18594382901";
+const ADS_ROTULO_CONTATO = "v8sRCMvk874dELWIv6JF";
+const EVENTOS_CONTATO = new Set(["whatsapp_click", "telefone_click"]);
+
+function enviar(w: Janela, evento: string, params: Record<string, string>) {
+  if (typeof w.gtag !== "function") return;
+  w.gtag("event", evento, params);
+  if (ADS_ID && EVENTOS_CONTATO.has(evento)) {
+    (w.gtag as unknown as (...a: unknown[]) => void)("event", "conversion", {
+      send_to: `${ADS_ID}/${ADS_ROTULO_CONTATO}`,
+      value: 1.0,
+      currency: "BRL",
+    });
+  }
+}
 
 export function origemDaVisita(): Record<string, string> {
   if (typeof window === "undefined") return {};
@@ -47,7 +66,7 @@ export function rastrear(evento: string, params: Record<string, string> = {}) {
   const w = window as Janela;
   if (typeof w.gtag !== "function" && !process.env.NEXT_PUBLIC_GA_ID) return; // sem GA, nada a medir
   const completo = { ...origemDaVisita(), pagina: window.location.pathname, ...params };
-  if (typeof w.gtag === "function") w.gtag("event", evento, completo);
+  if (typeof w.gtag === "function") enviar(w, evento, completo);
   else {
     // GA ainda não carregou (ou o aviso de cookies está aberto): guarda e envia se a pessoa aceitar.
     (w.__eventosPendentes ??= []).push([evento, completo]);
@@ -59,5 +78,5 @@ export function enviarPendentes() {
   const w = window as Janela;
   const fila = w.__eventosPendentes ?? [];
   w.__eventosPendentes = [];
-  if (typeof w.gtag === "function") for (const [e, p] of fila) w.gtag("event", e, p);
+  for (const [e, p] of fila) enviar(w, e, p);
 }

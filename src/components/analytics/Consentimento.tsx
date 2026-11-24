@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { enviarPendentes, origemDaVisita } from "@/lib/analytics";
+import { ADS_ID, enviarPendentes, origemDaVisita } from "@/lib/analytics";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const CHAVE = "maxima-encanador-consentimento";
@@ -22,12 +22,13 @@ function carregarGA(id: string) {
   };
   w.gtag("js", new Date());
   w.gtag("config", id, { anonymize_ip: true });
+  if (ADS_ID) w.gtag("config", ADS_ID); // Google Ads: mede o contato vindo dos anúncios
   enviarPendentes();
 }
 
 /**
  * Aviso de cookies. Só existe se houver NEXT_PUBLIC_GA_ID: sem rastreamento,
- * não há o que consentir e nada aparece. O GA4 só carrega depois do "Aceitar".
+ * não há o que consentir e nada aparece. GA4 e Google Ads só carregam depois do "Aceitar".
  */
 export function Consentimento() {
   const [visivel, setVisivel] = useState(false);
@@ -61,7 +62,7 @@ export function Consentimento() {
       className="fixed inset-x-3 bottom-[calc(var(--barra-mobile)+0.75rem)] z-[60] mx-auto max-w-xl rounded-3xl border border-linha-escura bg-tinta p-5 text-osso shadow-2xl md:bottom-6"
     >
       <p className="text-sm leading-relaxed text-nevoa">
-        Usamos cookies de medição (Google Analytics) para entender como o site é usado. Você pode aceitar ou recusar.{" "}
+        Usamos cookies de medição (Google Analytics) e de anúncios (Google Ads) para entender como o site é usado e quais anúncios trazem contato. Você pode aceitar ou recusar.{" "}
         <Link href="/politica-de-privacidade" className="text-cobre-claro underline">
           Saiba mais
         </Link>

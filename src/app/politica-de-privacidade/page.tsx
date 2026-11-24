@@ -68,7 +68,15 @@ export default function Privacidade() {
                 medição é criado. Durante a visita, o site anota de onde você veio (por exemplo, uma busca no Google) e a
                 primeira página aberta. Isso só vai para o Analytics com o seu aceite e não identifica você.
               </p>
-            ) : (
+            ) : null}
+            {temAnalytics && (
+              <p>
+                Com o mesmo aceite, o site também usa a tag do Google Ads para saber se um clique no WhatsApp ou no botão de
+                ligar veio de um anúncio da Máxima. Isso cria o cookie <code>_gcl_au</code> (até 90 dias) e serve só para
+                medir os anúncios. Recusando, ele não é criado.
+              </p>
+            )}
+            {!temAnalytics && (
               <p>
                 Hoje o site não usa cookies de medição nem de publicidade. Se isso mudar, um aviso vai pedir a sua permissão
                 antes de qualquer cookie que não seja essencial.
